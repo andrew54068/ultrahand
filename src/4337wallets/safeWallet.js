@@ -78,23 +78,22 @@ export class SafeWallet extends UltrahandWallet {
             txServiceUrl: 'https://safe-transaction-goerli.safe.global'
         })
 
+        await safeAuthKit.signIn();
+
         const provider = new ethers.providers.Web3Provider(safeAuthKit.getProvider(), {
             name: 'goerli',
             chainId: 5
         });
         const signer = provider.getSigner();
-        console.log(`💥 signer: ${JSON.stringify(signer, null, '  ')}`);
+
         const signerAddress = await signer.getAddress();
 
         const signerChainId = await signer.getChainId()
         console.log(`💥 signerChainId: ${signerChainId}`);
 
-        const chainId1 = (await provider.getNetwork()).chainId
-        console.log(`💥 chainId1: ${JSON.stringify(chainId1, null, '  ')}`);
-
         const ethAdapterOwner1 = new EthersAdapter({
             ethers,
-            signerOrProvider: provider
+            signerOrProvider: signer || provider
           })
 
         const safeAccountConfig: SafeAccountConfig = {
@@ -107,10 +106,16 @@ export class SafeWallet extends UltrahandWallet {
         const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapterOwner1 })
         const predictSafeAddress = await safeFactory.predictSafeAddress(safeAccountConfig)
         console.log(`💥 predictSafeAddress: ${JSON.stringify(predictSafeAddress, null, '  ')}`);
+        /**
+         * deploy address
+         */
         const safeSdkOwner1 = await safeFactory.deploySafe({ safeAccountConfig })
-        // console.log(`💥 safeSdkOwner1: ${JSON.stringify(safeSdkOwner1, null, '  ')}`);
         const safeAddress = await safeSdkOwner1.getAddress()
-        // const safeAddress = "0x9Be8EE8e11B0Fc9Edf26883809C58C4bb2E6d095"
+
+        /**
+         * already deploy address
+         * const safeAddress = "0x9Be8EE8e11B0Fc9Edf26883809C58C4bb2E6d095"
+         */
 
         const safeSDK = await Safe.create({
             ethAdapter: ethAdapterOwner1,
