@@ -1,8 +1,10 @@
 import {UltrahandWallet} from "../core/ultrahandWallet";
-import {Web3AuthModalPack} from '@safe-global/auth-kit';
+import {Web3AuthModalPack, SafeAuthKit} from '@safe-global/auth-kit';
+import Safe, { EthersAdapter, SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit'
 import {OpenloginAdapter} from '@web3auth/openlogin-adapter';
 import {CHAIN_NAMESPACES, WALLET_ADAPTERS} from "@web3auth/base";
 import {Web3AuthOptions} from '@web3auth/modal';
+import { ethers } from 'ethers'
 
 export class SafeWallet extends UltrahandWallet {
 
@@ -70,17 +72,61 @@ export class SafeWallet extends UltrahandWallet {
             }
         })
 
-        const web3AuthModalPack = new Web3AuthModalPack({
+        const web3AuthModalPack = new Web3AuthModalPack(options, [openloginAdapter], modalConfig)
+
+        const safeAuthKit = await SafeAuthKit.init(web3AuthModalPack, {
             txServiceUrl: 'https://safe-transaction-goerli.safe.global'
         })
 
-        await web3AuthModalPack.init({options, adapters: [openloginAdapter], modalConfig})
+        const provider = new ethers.providers.Web3Provider(safeAuthKit.getProvider(), {
+            name: 'goerli',
+            chainId: 5
+        });
+        const signer = provider.getSigner();
+        console.log(`💥 signer: ${JSON.stringify(signer, null, '  ')}`);
+        const signerAddress = await signer.getAddress();
 
-        const signInInfo = await web3AuthModalPack.signIn()
-        console.log('SIGN IN RESPONSE: ', signInInfo)
+        const signerChainId = await signer.getChainId()
+        console.log(`💥 signerChainId: ${signerChainId}`);
 
-        const userInfo = await web3AuthModalPack.getUserInfo()
-        console.log('USER INFO: ', userInfo)
+        const chainId1 = (await provider.getNetwork()).chainId
+        console.log(`💥 chainId1: ${JSON.stringify(chainId1, null, '  ')}`);
+
+        const ethAdapterOwner1 = new EthersAdapter({
+            ethers,
+            signerOrProvider: provider
+          })
+
+        const safeAccountConfig: SafeAccountConfig = {
+            owners: [
+                signerAddress,
+            ],
+            threshold: 1,
+          }
+
+        const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapterOwner1 })
+        const predictSafeAddress = await safeFactory.predictSafeAddress(safeAccountConfig)
+        console.log(`💥 predictSafeAddress: ${JSON.stringify(predictSafeAddress, null, '  ')}`);
+        const safeSdkOwner1 = await safeFactory.deploySafe({ safeAccountConfig })
+        // console.log(`💥 safeSdkOwner1: ${JSON.stringify(safeSdkOwner1, null, '  ')}`);
+        const safeAddress = await safeSdkOwner1.getAddress()
+        // const safeAddress = "0x9Be8EE8e11B0Fc9Edf26883809C58C4bb2E6d095"
+
+        const safeSDK = await Safe.create({
+            ethAdapter: ethAdapterOwner1,
+            safeAddress
+        })
+        
+        // Create a Safe transaction with the provided parameters
+        const safeTransactionData: MetaTransactionData = {
+            to: '0xF4911Cb13b50D967b9603c747e558dA7c1457e91',
+            data: '0x',
+            value: ethers.utils.parseUnits('0.00001', 'ether').toString()
+        }
+          
+        const safeTransaction = await safeSDK.createTransaction({ safeTransactionData })
+
+        console.log(`💥 safeTransaction: ${JSON.stringify(safeTransaction, null, '  ')}`);
 
         // setSafeAuthSignInResponse(signInInfo)
         // setUserInfo(userInfo || undefined)
