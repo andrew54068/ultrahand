@@ -1,7 +1,7 @@
 import {Component} from 'react';
 
 // material-ui
-import {Grid} from '@mui/material';
+import {Button, Grid} from '@mui/material';
 
 // project imports
 import EarningCard from './EarningCard';
@@ -9,6 +9,10 @@ import {gridSpacing} from 'store/constant';
 import {GlobalConfig} from "../../../ultrahand/globalConfig";
 import {ComponentPool} from "../../../ultrahand/core/componentPool";
 import {IconArrowDownCircle} from "@tabler/icons";
+import {InvokePool} from "../../../ultrahand/core/invokePool";
+import {UserOperationPool} from "../../../ultrahand/core/userOperationPool";
+import {UltrahandWallet} from "../../../ultrahand/core/ultrahandWallet";
+import {ComponentGraph} from "../../../ultrahand/core/componentGraph";
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
@@ -27,10 +31,36 @@ class Dashboard extends Component {
         }
     }
 
+    async SimulateAndSend() {
+        let nodes = []
+        GlobalConfig.getSingleton().nodes.forEach(((node, index) => {
+            let copyInputConfigs = this.state.componentInputConfigs[index]
+            if (copyInputConfigs[0].type === 'link') {
+                copyInputConfigs[0].value = {
+                    componentIndex: index - 1,
+                    outputIndex: 0,
+                }
+            }
+            nodes.push({
+                componentID: node.componentID,
+                inputs: copyInputConfigs,
+            })
+        }));
+        console.log(nodes)
+        InvokePool.getSingleton().clearInvoke()
+        UserOperationPool.getSingleton().clear()
+
+        await new ComponentGraph(nodes).run()
+
+        let unsignedUOP = UserOperationPool.getSingleton().popUserOperation()
+        let signedUOP = await UltrahandWallet.currentWallet.simulateTx(unsignedUOP)
+        await UltrahandWallet.currentWallet.sendTx(signedUOP)
+    }
+
     render() {
         let pool = new ComponentPool()
         let list = []
-        GlobalConfig.getSingleton().nodes.forEach((node, index) => {
+        GlobalConfig.getSingleton().nodes.forEach((node, index, nodes) => {
 
             let returnOutput = (index) => {
                 return (output) => {
@@ -55,17 +85,28 @@ class Dashboard extends Component {
                             <IconArrowDownCircle size={'50'}/>
                         </Grid> : <></>}
                     <Grid item lg={8} md={8} sm={8} xs={8}>
-                        <EarningCard component={pool.getComponent(node.componentID)}
+                        <EarningCard
+                                     component={pool.getComponent(node.componentID)}
                                      returnInputConfig={returnInputConfig(index)}
                                      returnOutput={returnOutput(index)}
-                                     prevOutput={((index) => {
-                                         return () => {
-                                             if (index === 0) return null
-
-                                             return this.state.componentOutputs[index - 1]
-                                         }
-                                     })(index)} isLoading={false}/>
+                                     prevOutput={this.state.componentOutputs[index - 1]}
+                                     isLoading={false}/>
                     </Grid>
+                    {index === nodes.length - 1 ?
+                        <Grid item lg={8} md={8} sm={8} xs={8}>
+                            <Button sx={{
+                                width: '100%',
+                                borderRadius: `5px`,
+                                marginTop: '20px',
+                                background: 'cornflowerblue',
+                                ":hover": {
+                                    background: 'dodgerblue',
+                                },
+                                color: 'white'
+                            }} alignItems="center" onClick={this.SimulateAndSend.bind(this)}>
+                                Simulate & Send
+                            </Button>
+                        </Grid> : <></>}
                 </Grid>
             </Grid>)
         });

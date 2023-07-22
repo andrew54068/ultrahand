@@ -26,6 +26,7 @@ export class BloctoWallet extends UltrahandWallet {
     }
 
     async connect() {
+
         this.bloctoSDK = new BloctoSDK({
             ethereum: {
                 // chainId: "0x13881", // (required) chainId to be used
@@ -36,6 +37,9 @@ export class BloctoWallet extends UltrahandWallet {
                 rpc: "https://mainnet.infura.io/v3/4577e17259294e4a92a22090f8c2c90d"
             },
         });
+
+        await this.bloctoSDK.ethereum.request({ method: "wallet_disconnect" });
+        localStorage.removeItem("sdk.session");
 
         this.web3 = new Web3(this.bloctoSDK.ethereum);
 
@@ -128,7 +132,7 @@ export class BloctoWallet extends UltrahandWallet {
             dests.push(invokes[i].to)
             // if invokes[i].value starts with 0x, it is hex string
             if (invokes[i].value.startsWith('0x')) {
-                values.push(parseInt(invokes[i].value, 16).toString(10))
+                values.push(ethers.BigNumber.from(invokes[i].value).toString(10))
             } else {
                 values.push(invokes[i].value)
             }

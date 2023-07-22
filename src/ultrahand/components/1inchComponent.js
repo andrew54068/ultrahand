@@ -1,6 +1,7 @@
 import {UltrahandComponent} from "../core/ultrahandComponent";
 import {Web3} from "web3";
 import {UltrahandWallet} from "../core/ultrahandWallet";
+import {ethers} from "ethers";
 
 export class OneInchComponent extends UltrahandComponent {
 
@@ -59,16 +60,17 @@ export class OneInchComponent extends UltrahandComponent {
         this.addInvoke({
             to: txData.to,
             data: txData.data,
-            value: parseInt(txData.value, 10).toString(16),
+            value: ethers.utils.hexlify(ethers.BigNumber.from(txData.value)),
         })
 
         // First, let's build the body of the transaction
+        ;
         const swapTransaction = await this.buildTxForSwap(swapParams);
-        console.log('Transaction for swap: ', swapTransaction);
+        console.log('Transaction for swap: ', swapTransaction, ethers.BigNumber.from(swapTransaction.tx.value));
         this.addInvoke({
             to: swapTransaction.tx.to,
             data: swapTransaction.tx.data,
-            value: parseInt(swapTransaction.tx.value, 10).toString(16),
+            value: ethers.utils.hexlify(ethers.BigNumber.from(swapTransaction.tx.value)),
         })
 
         this.output = [

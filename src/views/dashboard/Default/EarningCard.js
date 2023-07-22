@@ -63,6 +63,7 @@ const CardWrapper = styled(MainCard)(({theme}) => ({
 // ===========================|| DASHBOARD DEFAULT - EARNING CARD ||=========================== //
 
 const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, prevOutput}) => {
+
     let componentIns = new component()
 
     const theme = useTheme();
@@ -94,6 +95,7 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
             })
             setInputConfig(inputConfig)
             returnInputConfig(inputConfig)
+            simulate(inputConfig)()
         }
 
         handleInputClose()
@@ -128,7 +130,7 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
                 return
             }
 
-            if (!prevOutput || !prevOutput() || prevOutput().length === 0) {
+            if (!prevOutput || prevOutput.length === 0) {
                 alert("No previous output.")
                 setAnchorEl(null);
                 return
@@ -137,11 +139,12 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
             setAnchorEl(null);
             inputConfig.push({
                 type: "link",
-                value: prevOutput()[0].value,
+                value: prevOutput[0].value,
                 optionIndex: index,
             })
             setInputConfig(inputConfig)
             returnInputConfig(inputConfig)
+            simulate(inputConfig)()
         }
     }
 
@@ -153,17 +156,39 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
         returnInputConfig([])
     }
 
-    const simulate = async () => {
-        if (inputConfig.length === 0) {
-            alert("No input.")
-            setAnchorEl(null);
-            return
-        }
+    const simulate = (newInputConfig) => {
+        return async () => {
+            if (inputConfig.length === 0) {
+                alert("No input.")
+                setAnchorEl(null);
+                return
+            }
 
-        await componentIns.run(inputConfig)
-        setOutput(componentIns.output)
-        returnOutput(componentIns.output)
-        setAnchorEl(null);
+            let config = inputConfig
+            if (newInputConfig) {
+                config = newInputConfig
+            }
+
+            console.log(config)
+            await componentIns.run(config)
+            setOutput(componentIns.output)
+            returnOutput(componentIns.output)
+            setAnchorEl(null);
+        }
+    }
+
+    if (inputConfig && inputConfig.length > 0) {
+        if (inputConfig[0].type === "link") {
+            if (prevOutput && prevOutput.length > 0 && prevOutput[0].value !== inputConfig[0].value) {
+                let newInputConfig = [{
+                    type: "link",
+                    value: prevOutput[0].value,
+                    optionIndex: inputConfig[0].optionIndex,
+                }]
+                setInputConfig(newInputConfig)
+                simulate(newInputConfig)()
+            }
+        }
     }
 
     const menuItems = () => {
@@ -184,7 +209,7 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
         )
 
         items.push(
-            <MenuItem onClick={simulate}>
+            <MenuItem onClick={simulate()}>
                 <GetAppTwoToneIcon sx={{mr: 1.75}}/> Simulate
             </MenuItem>
         )
@@ -282,7 +307,24 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
                                             mb: 0.75
                                         }}>
                                             Input: {inputConfig.length > 0 ? inputConfig[0].value : 'empty'}
-                                            ({inputConfig.length > 0 ? componentIns.inputOptions()[inputConfig[0].optionIndex].name : 'empty'})
+                                            <Typography sx={{
+                                                fontSize: '1.125rem',
+                                                fontWeight: 500,
+                                                mr: 1,
+                                                mt: 1.75,
+                                                mb: 0.75
+                                            }}>
+                                                (option: {inputConfig.length > 0 ? `${componentIns.inputOptions()[inputConfig[0].optionIndex].name}` : 'empty'})
+                                            </Typography>
+                                            <Typography sx={{
+                                                fontSize: '1.125rem',
+                                                fontWeight: 500,
+                                                mr: 1,
+                                                mt: 1.75,
+                                                mb: 0.75
+                                            }}>
+                                                (type: {inputConfig.length > 0 ? `${inputConfig[0].type}` : 'empty'})
+                                            </Typography>
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -295,8 +337,17 @@ const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, pre
                                             mt: 1.75,
                                             mb: 0.75
                                         }}>
-                                            Output: {output.length > 0 ? output[0].value : 'empty'}
-                                            ({output.length > 0 ? output[0].name : 'empty'})
+                                            {output.length > 0 ?  `Output: ${output[0].value}` : null}
+                                            <Typography sx={{
+                                                fontSize: '1.125rem',
+                                                fontWeight: 500,
+                                                mr: 1,
+                                                mt: 1.75,
+                                                mb: 0.75
+                                            }}>
+                                                {output.length > 0 ? `(option: ${output[0].name})` : null}
+                                            </Typography>
+
                                         </Typography>
                                     </Grid>
                                 </Grid>
