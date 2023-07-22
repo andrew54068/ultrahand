@@ -81,7 +81,7 @@ export class BloctoWallet extends UltrahandWallet {
         }
     }
 
-    packBatchTx(invokes) {
+    async packBatchTx(invokes) {
         console.log('packBatchTx', invokes)
         let dests = []
         let values = []

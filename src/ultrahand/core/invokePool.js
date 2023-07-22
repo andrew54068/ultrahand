@@ -22,11 +22,11 @@ export class InvokePool {
         this.pool = []
     }
 
-    packIntoUserOperation() {
+    async packIntoUserOperation() {
         console.log("packIntoUserOperation")
         if (UltrahandWallet.currentWallet.isBatchSupported()) {
             console.log("packIntoUserOperation->packBatchTx")
-            let batchTx = UltrahandWallet.currentWallet.packBatchTx(this.pool)
+            let batchTx = await UltrahandWallet.currentWallet.packBatchTx(this.pool)
             UserOperationPool.getSingleton().addUserOperation(batchTx)
         } else {
             for (let i = 0; i < this.pool.length; i++) {

@@ -27,5 +27,5 @@ export class UltrahandWallet {
 
     packTx(invoke) {}
 
-    packBatchTx(invokes) {}
+    async packBatchTx(invokes) {}
 }

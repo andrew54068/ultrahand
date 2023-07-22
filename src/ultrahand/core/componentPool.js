@@ -16,7 +16,6 @@ export class ComponentPool {
 
     constructor() {
         ComponentPool.defaultPool.forEach((component) => {
-            console.log(component.id())
             this.components[component.id()] = component
         })
     }

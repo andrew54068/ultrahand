@@ -161,7 +161,6 @@ class Dashboard extends Component {
     }
 
     async UserGo() {
-        console.log(this.state.nodesForPreview)
         let nodes = []
         this.state.nodesForPreview.forEach(((node, index) => {
             let copyInputConfigs = this.state.nodesForPreview[index].inputs
@@ -189,29 +188,32 @@ class Dashboard extends Component {
     }
 
     async SimulateAndSend() {
-        let nodes = []
-        GlobalConfig.getSingleton().nodes.forEach(((node, index) => {
-            let copyInputConfigs = this.state.componentInputConfigs[index]
-            if (copyInputConfigs[0].type === 'link') {
-                copyInputConfigs[0].value = {
-                    componentIndex: index - 1,
-                    outputIndex: 0,
+        try {
+            let nodes = []
+            GlobalConfig.getSingleton().nodes.forEach(((node, index) => {
+                let copyInputConfigs = this.state.componentInputConfigs[index]
+                if (copyInputConfigs[0].type === 'link') {
+                    copyInputConfigs[0].value = {
+                        componentIndex: index - 1,
+                        outputIndex: 0,
+                    }
                 }
-            }
-            nodes.push({
-                componentID: node.componentID,
-                inputs: copyInputConfigs,
-            })
-        }));
-        console.log(nodes)
-        InvokePool.getSingleton().clearInvoke()
-        UserOperationPool.getSingleton().clear()
+                nodes.push({
+                    componentID: node.componentID,
+                    inputs: copyInputConfigs,
+                })
+            }));
+            InvokePool.getSingleton().clearInvoke()
+            UserOperationPool.getSingleton().clear()
 
-        await new ComponentGraph(nodes).run()
+            await new ComponentGraph(nodes).run()
 
-        let unsignedUOP = UserOperationPool.getSingleton().popUserOperation()
-        let signedUOP = await UltrahandWallet.currentWallet.simulateTx(unsignedUOP)
-        await UltrahandWallet.currentWallet.sendTx(signedUOP)
+            let unsignedUOP = UserOperationPool.getSingleton().popUserOperation()
+            let signedUOP = await UltrahandWallet.currentWallet.simulateTx(unsignedUOP)
+            await UltrahandWallet.currentWallet.sendTx(signedUOP)
+        } catch (e) {
+            console.log(`💥 e: ${JSON.stringify(e, null, '  ')}`);
+        }
     }
 
     render() {

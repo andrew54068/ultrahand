@@ -59,7 +59,6 @@ export class ComponentGraph {
     }
 
     async run() {
-        console.log(this.nodes)
         // level first, index second, the both value must be unique & sequential
         // index == 0 -> inputs must be custom
         // same level -> components can not be linked with each other
@@ -76,8 +75,6 @@ export class ComponentGraph {
 
                 for (let i = 0; i < node.inputs.length; i++) {
                     if (node.inputs[i].type === 'link') {
-                        console.log(node.inputs[i].value.outputIndex)
-                        console.log(prevOutput)
                         const linkedOutput = prevOutput[node.inputs[i].value.outputIndex]
                         node.inputs[i].value = linkedOutput.value
                     }
@@ -85,7 +82,7 @@ export class ComponentGraph {
                 await instance.Run(node.inputs)
                 prevOutput = instance.getOutput()
                 if (this.nodes.length - 1 === index) {
-                    InvokePool.getSingleton().packIntoUserOperation()
+                    await InvokePool.getSingleton().packIntoUserOperation()
                 }
             }
         }
