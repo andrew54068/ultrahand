@@ -87,6 +87,7 @@ export class SafeWallet extends UltrahandWallet {
         const signer = provider.getSigner();
 
         const signerAddress = await signer.getAddress();
+        console.log(`💥 signerAddress: ${JSON.stringify(signerAddress, null, '  ')}`);
 
         const signerChainId = await signer.getChainId()
         console.log(`💥 signerChainId: ${signerChainId}`);
