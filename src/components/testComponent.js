@@ -6,7 +6,7 @@ export class TestComponent extends UltrahandComponent {
         return "testComponent"
     }
 
-    run() {
+    async run() {
 
     }
 }

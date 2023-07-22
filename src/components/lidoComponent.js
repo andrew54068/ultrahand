@@ -9,7 +9,7 @@ export class LidoComponent extends UltrahandComponent {
         return "lidoComponent"
     }
 
-    run() {
+    async run() {
         this.addInvoke({
             to: this.ethereumTestnetAddress,
             value: '0x186A0',

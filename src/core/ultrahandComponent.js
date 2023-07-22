@@ -12,15 +12,15 @@ export class UltrahandComponent {
         // override this method
     }
 
-    run() {
+    async run() {
         // override this method
     }
 
-    Run() {
+    async Run(inputs) {
         // clear invoke pool by component id
         let invokeNum = InvokePool.getSingleton().invokeNum()
         console.log("run component: " + this.constructor.name, "invokeNum: " + invokeNum)
-        this.run();
+        await this.run(inputs);
         if (invokeNum === InvokePool.getSingleton().invokeNum()) {
             InvokePool.getSingleton().packIntoUserOperation()
         }
@@ -33,6 +33,10 @@ export class UltrahandComponent {
 
     getOutput() {
         return this.output
+    }
+
+    inputOptions() {
+
     }
 
 }
