@@ -128,4 +128,16 @@ export class OneInchComponent extends UltrahandComponent {
         ]
     }
 
+    customInputMsg() {
+        return "Swap"
+    }
+
+    inputMsg() {
+        return "Swap"
+    }
+
+    outputMsg() {
+        return "Swap"
+    }
+
 }

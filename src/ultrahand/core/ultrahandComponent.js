@@ -42,4 +42,16 @@ export class UltrahandComponent {
         return []
     }
 
+    customInputMsg() {
+        return ""
+    }
+
+    inputMsg() {
+        return ""
+    }
+
+    outputMsg() {
+        return ""
+    }
+
 }

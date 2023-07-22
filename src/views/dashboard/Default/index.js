@@ -1,7 +1,7 @@
 import {Component} from 'react';
 
 // material-ui
-import {Button, Grid} from '@mui/material';
+import {Button, Grid, Input} from '@mui/material';
 
 // project imports
 import EarningCard from './EarningCard';
@@ -13,6 +13,8 @@ import {InvokePool} from "../../../ultrahand/core/invokePool";
 import {UserOperationPool} from "../../../ultrahand/core/userOperationPool";
 import {UltrahandWallet} from "../../../ultrahand/core/ultrahandWallet";
 import {ComponentGraph} from "../../../ultrahand/core/componentGraph";
+import Grow from "@mui/material/Grow";
+import * as React from "react";
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
@@ -23,12 +25,149 @@ class Dashboard extends Component {
         this.state = {
             isLoading: true,
             componentOutputs: {},
-            componentInputConfigs: {}
+            componentInputConfigs: {},
+
+            nodesForPreview: [],
+            currentNode: null,
+            transitionView: null,
+            inTransition: false
         }
 
         GlobalConfig.getSingleton().update = () => {
             this.setState({isLoading: false})
         }
+    }
+
+    previewMode() {
+        if (this.state.inTransition) {
+            return this.state.transitionView
+        }
+
+        if (!this.state.currentNode && this.state.currentNode !== 0) {
+            return <Button onClick={() => {
+                if (!this.state.currentNode && this.state.currentNode !== 0) {
+                    this.setState({nodesForPreview: this.nodesForPreview()})
+                    this.setState({currentNode: 0})
+                } else {
+                    this.setState({currentNode: this.state.currentNode + 1})
+                }
+            }}>Start</Button>
+        } else if (this.state.currentNode >= this.state.nodesForPreview.length) {
+            return <Button onClick={ async () => {
+                await this.UserGo()
+                this.setState({currentNode: null})
+            }}>GO!</Button>
+        }
+
+        let prevNode = this.state.nodesForPreview[this.state.currentNode - 1]
+        let node = this.state.nodesForPreview[this.state.currentNode]
+        let copyNodes = this.state.nodesForPreview
+        let impl = new ComponentPool().getComponent(node.componentID)
+        if (impl == null) {
+            alert('component not found: ' + node.componentID)
+        } else {
+            let instance = new impl()
+            if (node.inputs[0].type === 'link') {
+                const linkedOutput = prevNode.outputs[node.inputs[0].value.outputIndex]
+                node.inputs[0].value = linkedOutput.value
+            } else if (node.inputs[0].type === 'custom' && node.inputs[0].value === null) {
+                return <div>
+                    <Input onChange={(event) => {
+                        node.inputs[0].value = event.target.value
+                    }}></Input>
+                    <Button onClick={() => {
+                        copyNodes[this.state.currentNode] = node
+                        this.setState({nodesForPreview: copyNodes})
+                    }}>Submit</Button>
+                </div>
+            }
+            instance.Run(node.inputs).then(async () => {
+                function resolveAfter1Seconds(timeout) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve('resolved');
+                        }, timeout);
+                    });
+                }
+
+                copyNodes[this.state.currentNode].outputs = instance.getOutput()
+
+                this.setState({inTransition: true, transitionView: <Grow
+                        in={true}
+                        style={{ transformOrigin: '0 0 0' }}
+                        {...({ timeout: 1000 })}
+                    >
+                        <div>Your {node.componentID} input value: {copyNodes[this.state.currentNode].inputs[0].value} {instance.inputOptions()[copyNodes[this.state.currentNode].inputs[0].optionIndex].name}</div>
+                    </Grow>})
+
+                await resolveAfter1Seconds(2000);
+
+                if (copyNodes[this.state.currentNode].outputs.length > 0) {
+                    this.setState({transitionView: null})
+                    await resolveAfter1Seconds(1000);
+                    this.setState({transitionView: <Grow
+                            in={true}
+                            style={{ transformOrigin: '0 0 0' }}
+                            {...({ timeout: 1000 })}
+                        >
+                            <div>Your {node.componentID} output value: {copyNodes[this.state.currentNode].outputs[0].value} {copyNodes[this.state.currentNode].outputs[0].name}</div>
+                        </Grow>})
+
+                    await resolveAfter1Seconds(3000);
+                }
+
+                this.setState({nodesForPreview: copyNodes, currentNode: this.state.currentNode + 1})
+                this.setState({transitionView: null, inTransition: false})
+            })
+        }
+    }
+
+    nodesForPreview() {
+        let nodes = []
+        GlobalConfig.getSingleton().nodes.forEach(((node, index) => {
+            let copyInputConfigs = JSON.parse(JSON.stringify(this.state.componentInputConfigs[index]));
+            if (copyInputConfigs[0].type === 'link') {
+                copyInputConfigs[0].value = {
+                    componentIndex: index - 1,
+                    outputIndex: 0,
+                }
+            } else if (copyInputConfigs[0].type === 'custom') {
+                copyInputConfigs[0].value = null
+            }
+            nodes.push({
+                componentID: node.componentID,
+                inputs: copyInputConfigs,
+            })
+        }));
+
+        return nodes
+    }
+
+    async UserGo() {
+        console.log(this.state.nodesForPreview)
+        let nodes = []
+        this.state.nodesForPreview.forEach(((node, index) => {
+            let copyInputConfigs = this.state.nodesForPreview[index].inputs
+            if (copyInputConfigs[0].type === 'link') {
+                copyInputConfigs[0].value = {
+                    componentIndex: index - 1,
+                    outputIndex: 0,
+                }
+            }
+            nodes.push({
+                componentID: node.componentID,
+                inputs: copyInputConfigs,
+            })
+        }));
+
+        InvokePool.getSingleton().clearInvoke()
+        UserOperationPool.getSingleton().clear()
+
+        await new ComponentGraph(nodes).run()
+
+        let unsignedUOP = UserOperationPool.getSingleton().popUserOperation()
+        let signedUOP = await UltrahandWallet.currentWallet.simulateTx(unsignedUOP)
+        await UltrahandWallet.currentWallet.sendTx(signedUOP)
     }
 
     async SimulateAndSend() {
@@ -78,22 +217,22 @@ class Dashboard extends Component {
                 }
             }
 
-            list.push(<Grid item xs={10}>
+            list.push(<Grid item lg={12} md={12} sm={12} xs={12}>
                 <Grid container spacing={gridSpacing}>
                     {index > 0 ?
-                        <Grid item lg={8} md={8} sm={8} xs={8} sx={{display: 'flex', justifyContent: 'center'}}>
+                        <Grid item lg={12} md={12} sm={12} xs={12} sx={{display: 'flex', justifyContent: 'center'}}>
                             <IconArrowDownCircle size={'50'}/>
                         </Grid> : <></>}
-                    <Grid item lg={8} md={8} sm={8} xs={8}>
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
                         <EarningCard
-                                     component={pool.getComponent(node.componentID)}
-                                     returnInputConfig={returnInputConfig(index)}
-                                     returnOutput={returnOutput(index)}
-                                     prevOutput={this.state.componentOutputs[index - 1]}
-                                     isLoading={false}/>
+                            component={pool.getComponent(node.componentID)}
+                            returnInputConfig={returnInputConfig(index)}
+                            returnOutput={returnOutput(index)}
+                            prevOutput={this.state.componentOutputs[index - 1]}
+                            isLoading={false}/>
                     </Grid>
                     {index === nodes.length - 1 ?
-                        <Grid item lg={8} md={8} sm={8} xs={8}>
+                        <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Button sx={{
                                 width: '100%',
                                 borderRadius: `5px`,
@@ -113,35 +252,15 @@ class Dashboard extends Component {
 
         return (
             <Grid container spacing={gridSpacing}>
-                {list}
+                <Grid item xs={6}>
+                    {list}
+                </Grid>
+                <Grid item lg={6} md={6} sm={6} xs={6}>
+                    {this.previewMode()}
+                </Grid>
             </Grid>
         );
     }
 }
-
-// const Dashboard = () => {
-//   const [isLoading, setLoading] = useState(true);
-//   useEffect(() => {
-//     setLoading(false);
-//   }, []);
-//
-//
-//   let list = []
-//   GlobalConfig.getSingleton().nodes.forEach((node) => {
-//     list.push(<Grid item xs={12}>
-//         <Grid container spacing={gridSpacing}>
-//             <Grid item lg={4} md={6} sm={6} xs={12}>
-//                 <EarningCard isLoading={isLoading} />
-//             </Grid>
-//         </Grid>
-//     </Grid>)
-//   });
-//
-//   return (
-//     <Grid container spacing={gridSpacing}>
-//         {list}
-//     </Grid>
-//   );
-// };
 
 export default Dashboard;
