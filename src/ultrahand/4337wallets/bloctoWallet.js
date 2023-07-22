@@ -33,12 +33,12 @@ export class BloctoWallet extends UltrahandWallet {
                 // rpc: "https://rpc-mumbai.maticvigil.com/",
                 // chainId: "0x1", // ethereum mainnet
                 // rpc: "https://mainnet.infura.io/v3/4577e17259294e4a92a22090f8c2c90d"
-                chainId: "0x89", // ethereum mainnet
+                chainId: "0x89", // polygon
                 rpc: "https://mainnet.infura.io/v3/4577e17259294e4a92a22090f8c2c90d"
             },
         });
 
-        await this.bloctoSDK.ethereum.request({ method: "wallet_disconnect" });
+        // await this.bloctoSDK.ethereum.request({ method: "wallet_disconnect" });
         localStorage.removeItem("sdk.session");
 
         this.web3 = new Web3(this.bloctoSDK.ethereum);

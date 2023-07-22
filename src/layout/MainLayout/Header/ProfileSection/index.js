@@ -41,6 +41,7 @@ import {IconLogout, IconSearch, IconSettings, IconUser, IconWallet} from '@table
 import {UltrahandWallet} from "../../../../ultrahand/core/ultrahandWallet";
 import {BloctoWallet} from "../../../../ultrahand/4337wallets/bloctoWallet";
 import {SafeWallet} from "../../../../ultrahand/4337wallets/safeWallet";
+import {Biconomy} from "../../../../ultrahand/4337wallets/biconomy";
 import BloctoIcon from 'assets/images/icons/blocto.svg';
 
 // ==============================|| PROFILE MENU ||============================== //
@@ -100,6 +101,18 @@ const ProfileSection = () => {
     }
 
     UltrahandWallet.setCurrentWallet(new SafeWallet())
+    await UltrahandWallet.currentWallet.connect()
+  };
+
+  const handleBiconomy = async (event, index, route = '') => {
+    setSelectedIndex(index);
+    handleClose(event);
+
+    if (route && route !== '') {
+      navigate(route);
+    }
+
+    UltrahandWallet.setCurrentWallet(new Biconomy())
     await UltrahandWallet.currentWallet.connect()
   };
 
@@ -190,6 +203,25 @@ const ProfileSection = () => {
                       >
                         <ListItemButton
                           sx={{ borderRadius: `${customization.borderRadius}px` }}
+                          // selected={selectedIndex === 4}
+                          height={50}
+                          onClick={handleSafe}
+                        >
+                          <ListItemIcon>
+                            <Avatar
+                                variant="rounded"
+                                sx={{
+                                  ...theme.typography.commonAvatar,
+                                  ...theme.typography.largeAvatar,
+                                  mt: 1
+                                }}
+                                src={'https://storage.googleapis.com/ethglobal-api-production/organizations%2Fweaax%2Flogo%2F1667857487267_vRyTLmek_400x400.jpeg'}>
+                            </Avatar>
+                          </ListItemIcon>
+                          <ListItemText primary={<Typography variant="body2">Safe Wallet</Typography>} />
+                        </ListItemButton>
+                        <ListItemButton
+                          sx={{ borderRadius: `${customization.borderRadius}px` }}
                           height={50}
                           // selected={selectedIndex === 0}
                           onClick={handleBlocto}
@@ -207,23 +239,23 @@ const ProfileSection = () => {
                           <ListItemText primary={<Typography variant="body2">Blocto Wallet</Typography>} />
                         </ListItemButton>
                         <ListItemButton
-                          sx={{ borderRadius: `${customization.borderRadius}px` }}
-                          // selected={selectedIndex === 4}
+                          sx={{ 
+                            borderRadius: `${customization.borderRadius}px`,
+                          }}
                           height={50}
-                          onClick={handleSafe}
+                          onClick={handleBiconomy}
                         >
                           <ListItemIcon>
                             <Avatar
-                                variant="rounded"
-                                sx={{
-                                  ...theme.typography.commonAvatar,
-                                  ...theme.typography.largeAvatar,
-                                  mt: 1
-                                }}
-                                src={'https://storage.googleapis.com/ethglobal-api-production/organizations%2Fweaax%2Flogo%2F1667857487267_vRyTLmek_400x400.jpeg'}>
-                            </Avatar>
+                                  variant="rounded"
+                                  sx={{
+                                    backgroundColor: '#ffffff',
+                                    mt: 1
+                                  }}
+                                  src={'https://canada1.discourse-cdn.com/standard30/uploads/biconomy/original/1X/6d610935c5b528456c9ed44e9b519ee5d4df7c6c.png'}>
+                              </Avatar>
                           </ListItemIcon>
-                          <ListItemText primary={<Typography variant="body2">Safe Wallet</Typography>} />
+                          <ListItemText primary={<Typography variant="body2">Biconomy</Typography>} />
                         </ListItemButton>
                       </List>
                     </Box>

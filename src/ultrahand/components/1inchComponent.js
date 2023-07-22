@@ -16,6 +16,13 @@ export class OneInchComponent extends UltrahandComponent {
             matic: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
         }
     }
+    requestOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer DtBQbH4Bjot7X1zmm5CIYUPN1RIoQaAE',
+            'Access-Control-Allow-Origin': 'http://localhost:3000/'
+        }
+    }
 
     static id() {
         return "1inchComponent"
@@ -89,7 +96,10 @@ export class OneInchComponent extends UltrahandComponent {
     }
 
     checkAllowance(tokenAddress, walletAddress) {
-        return fetch(this.apiRequestUrl('/approve/allowance', {tokenAddress, walletAddress}))
+        return fetch(
+            this.apiRequestUrl('/approve/allowance', {tokenAddress, walletAddress}),
+            this.requestOptions
+        )
             .then(res => res.json())
             .then(res => res.allowance);
     }
@@ -100,7 +110,7 @@ export class OneInchComponent extends UltrahandComponent {
             amount ? {tokenAddress, amount} : {tokenAddress}
         );
 
-        const transaction = await fetch(url).then(res => res.json());
+        const transaction = await fetch(url, this.requestOptions).then(res => res.json());
         return transaction;
     }
 
@@ -108,7 +118,7 @@ export class OneInchComponent extends UltrahandComponent {
         const url = this.apiRequestUrl('/swap', swapParams);
 
         // Fetch the swap transaction details from the API
-        return fetch(url)
+        return fetch(url, this.requestOptions)
             .then(res => res.json())
             .then(res => res);
     }

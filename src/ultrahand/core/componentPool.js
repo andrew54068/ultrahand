@@ -6,10 +6,10 @@ import {AaveComponent} from "../components/aaveComponent";
 export class ComponentPool {
 
     static defaultPool = [
-        LidoComponent,
         TransferComponent,
         OneInchComponent,
-        AaveComponent
+        AaveComponent,
+        LidoComponent,
     ]
 
     components = {}

@@ -6,11 +6,11 @@ export class LidoComponent extends UltrahandComponent {
     ethereumTestnetAddress = '0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F' // goerli
 
     static id() {
-        return "lidoComponent"
+        return "ApeCoin Staking"
     }
 
     static icon() {
-        return "https://lido.fi/static/images/favicon/apple-touch-icon.png"
+        return "https://cryptonaute.fr/wp-content/uploads/2022/05/apecoin.png.webp"
     }
 
     async run() {
