@@ -1,7 +1,7 @@
 import {Component} from 'react';
 
 // material-ui
-import {Button, Grid, Input} from '@mui/material';
+import {Button, Grid, Input, Typography} from '@mui/material';
 
 // project imports
 import EarningCard from './EarningCard';
@@ -44,7 +44,7 @@ class Dashboard extends Component {
         }
 
         if (!this.state.currentNode && this.state.currentNode !== 0) {
-            return <Button onClick={() => {
+            return <Button sx={{width: '80%', background: '#ff91008c'}} onClick={() => {
                 if (!this.state.currentNode && this.state.currentNode !== 0) {
                     this.setState({nodesForPreview: this.nodesForPreview()})
                     this.setState({currentNode: 0})
@@ -53,7 +53,7 @@ class Dashboard extends Component {
                 }
             }}>Start</Button>
         } else if (this.state.currentNode >= this.state.nodesForPreview.length) {
-            return <Button onClick={ async () => {
+            return <Button sx={{width: '80%', background: '#ff91008c'}} onClick={ async () => {
                 await this.UserGo()
                 this.setState({currentNode: null})
             }}>GO!</Button>
@@ -97,7 +97,16 @@ class Dashboard extends Component {
                         style={{ transformOrigin: '0 0 0' }}
                         {...({ timeout: 1000 })}
                     >
-                        <div>Your {node.componentID} input value: {copyNodes[this.state.currentNode].inputs[0].value} {instance.inputOptions()[copyNodes[this.state.currentNode].inputs[0].optionIndex].name}</div>
+                        <Typography sx={{
+                            fontSize: '1.125rem',
+                            fontWeight: 300,
+                            mr: 1,
+                            mt: 1.75,
+                            mb: 0.75,
+                            width: '80%',
+                        }}>
+                            Your {node.componentID} input value: {copyNodes[this.state.currentNode].inputs[0].value} {instance.inputOptions()[copyNodes[this.state.currentNode].inputs[0].optionIndex].name}
+                        </Typography>
                     </Grow>})
 
                 await resolveAfter1Seconds(2000);
@@ -110,7 +119,16 @@ class Dashboard extends Component {
                             style={{ transformOrigin: '0 0 0' }}
                             {...({ timeout: 1000 })}
                         >
-                            <div>Your {node.componentID} output value: {copyNodes[this.state.currentNode].outputs[0].value} {copyNodes[this.state.currentNode].outputs[0].name}</div>
+                            <Typography sx={{
+                                fontSize: '1.125rem',
+                                fontWeight: 300,
+                                mr: 1,
+                                mt: 1.75,
+                                mb: 0.75,
+                                width: '80%',
+                            }}>
+                                Your {node.componentID} output value: {copyNodes[this.state.currentNode].outputs[0].value} {copyNodes[this.state.currentNode].outputs[0].name}
+                            </Typography>
                         </Grow>})
 
                     await resolveAfter1Seconds(3000);
@@ -255,7 +273,19 @@ class Dashboard extends Component {
                 <Grid item xs={6}>
                     {list}
                 </Grid>
-                <Grid item lg={6} md={6} sm={6} xs={6}>
+                <Grid sx={{padding: '30px'}} item lg={6} md={6} sm={6} xs={6}>
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                        <Typography sx={{
+                            fontSize: '2.125rem',
+                            fontWeight: 500,
+                            mr: 1,
+                            mt: 1.75,
+                            mb: 0.75,
+                            width: '80%',
+                        }}>
+                            Preview Mode
+                        </Typography>
+                    </Grid>
                     {this.previewMode()}
                 </Grid>
             </Grid>
