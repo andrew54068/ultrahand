@@ -20,6 +20,10 @@ export class OneInchComponent extends UltrahandComponent {
         return "1inchComponent"
     }
 
+    static icon() {
+        return "https://1inch.io/img/favicon/safari-pinned-tab.svg"
+    }
+
     async run(inputs) {
         if (!inputs || inputs.length < 1) {
             throw new Error("input 0 is required")
@@ -69,7 +73,7 @@ export class OneInchComponent extends UltrahandComponent {
 
         this.output = [
             {
-                name: "Token: "+ (inputs[0].optionIndex === 0 ? 'MATIC' : 'USDC'),
+                name: inputs[0].optionIndex === 0 ? 'MATIC' : 'USDC',
                 description: "To token for swap",
                 valueType: "string",
                 value: swapTransaction.toTokenAmount

@@ -1,22 +1,30 @@
 // assets
-import { IconDashboard } from '@tabler/icons';
+import {IconLego, IconStar, IconDashboard} from '@tabler/icons';
 
 // constant
-const icons = { IconDashboard };
+const icons = { IconDashboard, IconLego, IconStar };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
 const dashboard = {
   id: 'dashboard',
-  title: 'Dashboard',
+  title: 'Ultrahand',
   type: 'group',
   children: [
     {
       id: 'default',
-      title: 'Dashboard',
+      title: 'Build',
       type: 'item',
       url: '/dashboard/default',
-      icon: icons.IconDashboard,
+      icon: icons.IconLego,
+      breadcrumbs: false
+    },
+    {
+      id: 'favorite',
+      title: 'My Favorites',
+      type: 'item',
+      url: '/dashboard/default',
+      icon: icons.IconStar,
       breadcrumbs: false
     }
   ]

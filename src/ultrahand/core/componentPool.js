@@ -1,4 +1,3 @@
-import {TestComponent} from "../components/testComponent";
 import {LidoComponent} from "../components/lidoComponent";
 import {TransferComponent} from "../components/transferComponent";
 import {OneInchComponent} from "../components/1inchComponent";
@@ -7,7 +6,6 @@ import {AaveComponent} from "../components/aaveComponent";
 export class ComponentPool {
 
     static defaultPool = [
-        TestComponent,
         LidoComponent,
         TransferComponent,
         OneInchComponent,

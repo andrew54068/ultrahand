@@ -14,12 +14,14 @@ export class AaveComponent extends UltrahandComponent {
         return "aaveComponent"
     }
 
+    static icon() {
+        return "https://app.aave.com/aave_icon180.png"
+    }
+
     async run(inputs) {
         if (!inputs || inputs.length < 1) {
             throw new Error("input 0 is required")
         }
-
-        console.log(inputs)
 
         let walletAddress = UltrahandWallet.currentWallet.currentAddress()
         let aaveContract = new ethers.utils.Interface(this.aaveABI);
@@ -30,5 +32,15 @@ export class AaveComponent extends UltrahandComponent {
             data: callData
         })
         this.output = []
+    }
+
+    inputOptions() {
+        return [
+            {
+                name: "MATIC",
+                description: "From token for supply",
+                valueType: "string",
+            },
+        ]
     }
 }

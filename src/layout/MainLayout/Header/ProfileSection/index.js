@@ -37,7 +37,11 @@ import UpgradePlanCard from './UpgradePlanCard';
 import User1 from 'assets/images/users/user-round.svg';
 
 // assets
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons';
+import {IconLogout, IconSearch, IconSettings, IconUser, IconWallet} from '@tabler/icons';
+import {UltrahandWallet} from "../../../../ultrahand/core/ultrahandWallet";
+import {BloctoWallet} from "../../../../ultrahand/4337wallets/bloctoWallet";
+import {SafeWallet} from "../../../../ultrahand/4337wallets/safeWallet";
+import BloctoIcon from 'assets/images/icons/blocto.svg';
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -74,6 +78,31 @@ const ProfileSection = () => {
       navigate(route);
     }
   };
+
+  const handleBlocto = async (event, index, route = '') => {
+    setSelectedIndex(index);
+    handleClose(event);
+
+    if (route && route !== '') {
+      navigate(route);
+    }
+
+    UltrahandWallet.setCurrentWallet(new BloctoWallet())
+    await UltrahandWallet.currentWallet.connect()
+  };
+
+  const handleSafe = async (event, index, route = '') => {
+    setSelectedIndex(index);
+    handleClose(event);
+
+    if (route && route !== '') {
+      navigate(route);
+    }
+
+    UltrahandWallet.setCurrentWallet(new SafeWallet())
+    await UltrahandWallet.currentWallet.connect()
+  };
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -109,21 +138,8 @@ const ProfileSection = () => {
             lineHeight: 0
           }
         }}
-        icon={
-          <Avatar
-            src={User1}
-            sx={{
-              ...theme.typography.mediumAvatar,
-              margin: '8px 0 8px 8px !important',
-              cursor: 'pointer'
-            }}
-            ref={anchorRef}
-            aria-controls={open ? 'menu-list-grow' : undefined}
-            aria-haspopup="true"
-            color="inherit"
-          />
-        }
-        label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
+        icon={<Avatar src={User1} alt="User 1" />}
+        label={<IconWallet stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
         variant="outlined"
         ref={anchorRef}
         aria-controls={open ? 'menu-list-grow' : undefined}
@@ -154,81 +170,8 @@ const ProfileSection = () => {
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
-                  <Box sx={{ p: 2 }}>
-                    <Stack>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Typography variant="h4">Good Morning,</Typography>
-                        <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
-                          Johne Doe
-                        </Typography>
-                      </Stack>
-                      <Typography variant="subtitle2">Project Admin</Typography>
-                    </Stack>
-                    <OutlinedInput
-                      sx={{ width: '100%', pr: 1, pl: 2, my: 2 }}
-                      id="input-search-profile"
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)}
-                      placeholder="Search profile options"
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <IconSearch stroke={1.5} size="1rem" color={theme.palette.grey[500]} />
-                        </InputAdornment>
-                      }
-                      aria-describedby="search-helper-text"
-                      inputProps={{
-                        'aria-label': 'weight'
-                      }}
-                    />
-                    <Divider />
-                  </Box>
                   <PerfectScrollbar style={{ height: '100%', maxHeight: 'calc(100vh - 250px)', overflowX: 'hidden' }}>
                     <Box sx={{ p: 2 }}>
-                      <UpgradePlanCard />
-                      <Divider />
-                      <Card
-                        sx={{
-                          bgcolor: theme.palette.primary.light,
-                          my: 2
-                        }}
-                      >
-                        <CardContent>
-                          <Grid container spacing={3} direction="column">
-                            <Grid item>
-                              <Grid item container alignItems="center" justifyContent="space-between">
-                                <Grid item>
-                                  <Typography variant="subtitle1">Start DND Mode</Typography>
-                                </Grid>
-                                <Grid item>
-                                  <Switch
-                                    color="primary"
-                                    checked={sdm}
-                                    onChange={(e) => setSdm(e.target.checked)}
-                                    name="sdm"
-                                    size="small"
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                            <Grid item>
-                              <Grid item container alignItems="center" justifyContent="space-between">
-                                <Grid item>
-                                  <Typography variant="subtitle1">Allow Notifications</Typography>
-                                </Grid>
-                                <Grid item>
-                                  <Switch
-                                    checked={notification}
-                                    onChange={(e) => setNotification(e.target.checked)}
-                                    name="sdm"
-                                    size="small"
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
-                      </Card>
-                      <Divider />
                       <List
                         component="nav"
                         sx={{
@@ -247,51 +190,40 @@ const ProfileSection = () => {
                       >
                         <ListItemButton
                           sx={{ borderRadius: `${customization.borderRadius}px` }}
-                          selected={selectedIndex === 0}
-                          onClick={(event) => handleListItemClick(event, 0, '#')}
+                          height={50}
+                          // selected={selectedIndex === 0}
+                          onClick={handleBlocto}
                         >
                           <ListItemIcon>
-                            <IconSettings stroke={1.5} size="1.3rem" />
+                            <svg data-bbox="0 0 16 16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" data-type="color">
+                              <g>
+                                <path fill="#ffffff" d="M16 0v16H0V0h16z" data-color="1"/>
+                                <path d="M8.33 5.26c-1.06 0-2.09.41-2.86 1.13-.85.79-1.38 1.96-1.69 3.06-.2.72-.3 1.47-.3 2.22 0 .23 0 .45.03.67.02.27.28.46.55.39.23-.06.47-.09.71-.09a2.732 2.732 0 0 1 1.42.4c.66.4 1.45.61 2.28.58 2.18-.07 3.95-1.84 4.03-4.02a4.184 4.184 0 0 0-4.18-4.34Zm0 6.09a1.91 1.91 0 1 1 0-3.82 1.91 1.91 0 0 1 0 3.82Z" fill="#14aaff" data-color="2"/>
+                                <path d="M6.62 3.95c0 .55-.29 1.06-.76 1.34-.3.18-.58.38-.83.62-.56.53-.98 1.17-1.29 1.81-.06.13-.25.08-.25-.06V3.95c0-.86.7-1.56 1.56-1.56.86 0 1.56.7 1.56 1.56Z" fill="#0077ff" data-color="3"/>
+                              </g>
+                            </svg>
+
                           </ListItemIcon>
-                          <ListItemText primary={<Typography variant="body2">Account Settings</Typography>} />
+                          <ListItemText primary={<Typography variant="body2">Blocto Wallet</Typography>} />
                         </ListItemButton>
                         <ListItemButton
                           sx={{ borderRadius: `${customization.borderRadius}px` }}
-                          selected={selectedIndex === 1}
-                          onClick={(event) => handleListItemClick(event, 1, '#')}
+                          // selected={selectedIndex === 4}
+                          height={50}
+                          onClick={handleSafe}
                         >
                           <ListItemIcon>
-                            <IconUser stroke={1.5} size="1.3rem" />
+                            <Avatar
+                                variant="rounded"
+                                sx={{
+                                  ...theme.typography.commonAvatar,
+                                  ...theme.typography.largeAvatar,
+                                  mt: 1
+                                }}
+                                src={'https://storage.googleapis.com/ethglobal-api-production/organizations%2Fweaax%2Flogo%2F1667857487267_vRyTLmek_400x400.jpeg'}>
+                            </Avatar>
                           </ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Grid container spacing={1} justifyContent="space-between">
-                                <Grid item>
-                                  <Typography variant="body2">Social Profile</Typography>
-                                </Grid>
-                                <Grid item>
-                                  <Chip
-                                    label="02"
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.warning.dark,
-                                      color: theme.palette.background.default
-                                    }}
-                                  />
-                                </Grid>
-                              </Grid>
-                            }
-                          />
-                        </ListItemButton>
-                        <ListItemButton
-                          sx={{ borderRadius: `${customization.borderRadius}px` }}
-                          selected={selectedIndex === 4}
-                          onClick={handleLogout}
-                        >
-                          <ListItemIcon>
-                            <IconLogout stroke={1.5} size="1.3rem" />
-                          </ListItemIcon>
-                          <ListItemText primary={<Typography variant="body2">Logout</Typography>} />
+                          <ListItemText primary={<Typography variant="body2">Safe Wallet</Typography>} />
                         </ListItemButton>
                       </List>
                     </Box>

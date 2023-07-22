@@ -9,6 +9,10 @@ export class LidoComponent extends UltrahandComponent {
         return "lidoComponent"
     }
 
+    static icon() {
+        return "https://lido.fi/static/images/favicon/apple-touch-icon.png"
+    }
+
     async run() {
         this.addInvoke({
             to: this.ethereumTestnetAddress,

@@ -1,59 +1,106 @@
-import { useEffect, useState } from 'react';
+import {Component} from 'react';
 
 // material-ui
-import { Grid } from '@mui/material';
+import {Grid} from '@mui/material';
 
 // project imports
 import EarningCard from './EarningCard';
-import PopularCard from './PopularCard';
-import TotalOrderLineChartCard from './TotalOrderLineChartCard';
-import TotalIncomeDarkCard from './TotalIncomeDarkCard';
-import TotalIncomeLightCard from './TotalIncomeLightCard';
-import TotalGrowthBarChart from './TotalGrowthBarChart';
-import { gridSpacing } from 'store/constant';
+import {gridSpacing} from 'store/constant';
+import {GlobalConfig} from "../../../ultrahand/globalConfig";
+import {ComponentPool} from "../../../ultrahand/core/componentPool";
+import {IconArrowDownCircle} from "@tabler/icons";
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
-const Dashboard = () => {
-  const [isLoading, setLoading] = useState(true);
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+class Dashboard extends Component {
 
-  return (
-    <Grid container spacing={gridSpacing}>
-      <Grid item xs={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid item lg={4} md={6} sm={6} xs={12}>
-            <EarningCard isLoading={isLoading} />
-          </Grid>
-          <Grid item lg={4} md={6} sm={6} xs={12}>
-            <TotalOrderLineChartCard isLoading={isLoading} />
-          </Grid>
-          <Grid item lg={4} md={12} sm={12} xs={12}>
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoading: true,
+            componentOutputs: {},
+            componentInputConfigs: {}
+        }
+
+        GlobalConfig.getSingleton().update = () => {
+            this.setState({isLoading: false})
+        }
+    }
+
+    render() {
+        let pool = new ComponentPool()
+        let list = []
+        GlobalConfig.getSingleton().nodes.forEach((node, index) => {
+
+            let returnOutput = (index) => {
+                return (output) => {
+                    let copyOutputs = this.state.componentOutputs
+                    copyOutputs[index] = output
+                    this.setState({componentOutputs: copyOutputs})
+                }
+            }
+
+            let returnInputConfig = (index) => {
+                return (inputConfig) => {
+                    let copyInputConfig = this.state.componentInputConfigs
+                    copyInputConfig[index] = inputConfig
+                    this.setState({componentInputConfigs: copyInputConfig})
+                }
+            }
+
+            list.push(<Grid item xs={10}>
+                <Grid container spacing={gridSpacing}>
+                    {index > 0 ?
+                        <Grid item lg={8} md={8} sm={8} xs={8} sx={{display: 'flex', justifyContent: 'center'}}>
+                            <IconArrowDownCircle size={'50'}/>
+                        </Grid> : <></>}
+                    <Grid item lg={8} md={8} sm={8} xs={8}>
+                        <EarningCard component={pool.getComponent(node.componentID)}
+                                     returnInputConfig={returnInputConfig(index)}
+                                     returnOutput={returnOutput(index)}
+                                     prevOutput={((index) => {
+                                         return () => {
+                                             if (index === 0) return null
+
+                                             return this.state.componentOutputs[index - 1]
+                                         }
+                                     })(index)} isLoading={false}/>
+                    </Grid>
+                </Grid>
+            </Grid>)
+        });
+
+        return (
             <Grid container spacing={gridSpacing}>
-              <Grid item sm={6} xs={12} md={6} lg={12}>
-                <TotalIncomeDarkCard isLoading={isLoading} />
-              </Grid>
-              <Grid item sm={6} xs={12} md={6} lg={12}>
-                <TotalIncomeLightCard isLoading={isLoading} />
-              </Grid>
+                {list}
             </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} md={8}>
-            <TotalGrowthBarChart isLoading={isLoading} />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <PopularCard isLoading={isLoading} />
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
-  );
-};
+        );
+    }
+}
+
+// const Dashboard = () => {
+//   const [isLoading, setLoading] = useState(true);
+//   useEffect(() => {
+//     setLoading(false);
+//   }, []);
+//
+//
+//   let list = []
+//   GlobalConfig.getSingleton().nodes.forEach((node) => {
+//     list.push(<Grid item xs={12}>
+//         <Grid container spacing={gridSpacing}>
+//             <Grid item lg={4} md={6} sm={6} xs={12}>
+//                 <EarningCard isLoading={isLoading} />
+//             </Grid>
+//         </Grid>
+//     </Grid>)
+//   });
+//
+//   return (
+//     <Grid container spacing={gridSpacing}>
+//         {list}
+//     </Grid>
+//   );
+// };
 
 export default Dashboard;

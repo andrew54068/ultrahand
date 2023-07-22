@@ -13,6 +13,8 @@ import MenuList from './MenuList';
 import LogoSection from '../LogoSection';
 import MenuCard from './MenuCard';
 import { drawerWidth } from 'store/constant';
+import {ComponentPool} from "../../../ultrahand/core/componentPool";
+import SearchSection from './SearchSection';
 
 // ==============================|| SIDEBAR DRAWER ||============================== //
 
@@ -20,6 +22,9 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
   const theme = useTheme();
   const matchUpMd = useMediaQuery(theme.breakpoints.up('md'));
 
+    let componentCards = ComponentPool.defaultPool.map((component) => {
+        return <MenuCard key={component.id()} component={component} />
+    })
   const drawer = (
     <>
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
@@ -37,7 +42,9 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
           }}
         >
           <MenuList />
-          <MenuCard />
+            <SearchSection/>
+
+            {componentCards}
           <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
             <Chip label={process.env.REACT_APP_VERSION} disabled chipcolor="secondary" size="small" sx={{ cursor: 'pointer' }} />
           </Stack>

@@ -1,185 +1,316 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import {useState} from 'react';
 
 // material-ui
-import { styled, useTheme } from '@mui/material/styles';
-import { Avatar, Box, Grid, Menu, MenuItem, Typography } from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
+import {
+    Avatar,
+    Box, Button,
+    Dialog, DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Grid,
+    Menu,
+    MenuItem, TextField,
+    Typography
+} from '@mui/material';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import SkeletonEarningCard from 'ui-component/cards/Skeleton/EarningCard';
 
 // assets
-import EarningIcon from 'assets/images/icons/earning.svg';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import GetAppTwoToneIcon from '@mui/icons-material/GetAppOutlined';
-import FileCopyTwoToneIcon from '@mui/icons-material/FileCopyOutlined';
-import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfOutlined';
-import ArchiveTwoToneIcon from '@mui/icons-material/ArchiveOutlined';
 
-const CardWrapper = styled(MainCard)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.dark,
-  color: '#fff',
-  overflow: 'hidden',
-  position: 'relative',
-  '&:after': {
-    content: '""',
-    position: 'absolute',
-    width: 210,
-    height: 210,
-    background: theme.palette.secondary[800],
-    borderRadius: '50%',
-    top: -85,
-    right: -95,
-    [theme.breakpoints.down('sm')]: {
-      top: -105,
-      right: -140
+const CardWrapper = styled(MainCard)(({theme}) => ({
+    backgroundColor: theme.palette.secondary.dark,
+    color: '#fff',
+    overflow: 'hidden',
+    position: 'relative',
+    '&:after': {
+        content: '""',
+        position: 'absolute',
+        width: 210,
+        height: 210,
+        background: theme.palette.secondary[800],
+        borderRadius: '50%',
+        top: -85,
+        right: -95,
+        [theme.breakpoints.down('sm')]: {
+            top: -105,
+            right: -140
+        }
+    },
+    '&:before': {
+        content: '""',
+        position: 'absolute',
+        width: 210,
+        height: 210,
+        background: theme.palette.secondary[800],
+        borderRadius: '50%',
+        top: -125,
+        right: -15,
+        opacity: 0.5,
+        [theme.breakpoints.down('sm')]: {
+            top: -155,
+            right: -70
+        }
     }
-  },
-  '&:before': {
-    content: '""',
-    position: 'absolute',
-    width: 210,
-    height: 210,
-    background: theme.palette.secondary[800],
-    borderRadius: '50%',
-    top: -125,
-    right: -15,
-    opacity: 0.5,
-    [theme.breakpoints.down('sm')]: {
-      top: -155,
-      right: -70
-    }
-  }
 }));
 
 // ===========================|| DASHBOARD DEFAULT - EARNING CARD ||=========================== //
 
-const EarningCard = ({ isLoading }) => {
-  const theme = useTheme();
+const EarningCard = ({component, isLoading, returnInputConfig, returnOutput, prevOutput}) => {
+    let componentIns = new component()
 
-  const [anchorEl, setAnchorEl] = useState(null);
+    const theme = useTheme();
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [inputConfig, setInputConfig] = useState([]);
+    const [output, setOutput] = useState([]);
+    const [inputOpen, setInputOpen] = useState(false);
+    const [currentOptionIndex, setCurrentOptionIndex] = useState(null);
+    const [inputValue, setInputValue] = useState(null);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+    const handleInputClickOpen = (index) => {
+        setInputOpen(true);
+        setCurrentOptionIndex(index)
+    };
 
-  return (
-    <>
-      {isLoading ? (
-        <SkeletonEarningCard />
-      ) : (
-        <CardWrapper border={false} content={false}>
-          <Box sx={{ p: 2.25 }}>
-            <Grid container direction="column">
-              <Grid item>
-                <Grid container justifyContent="space-between">
-                  <Grid item>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.largeAvatar,
-                        backgroundColor: theme.palette.secondary[800],
-                        mt: 1
-                      }}
-                    >
-                      <img src={EarningIcon} alt="Notification" />
-                    </Avatar>
-                  </Grid>
-                  <Grid item>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.mediumAvatar,
-                        backgroundColor: theme.palette.secondary.dark,
-                        color: theme.palette.secondary[200],
-                        zIndex: 1
-                      }}
-                      aria-controls="menu-earning-card"
-                      aria-haspopup="true"
-                      onClick={handleClick}
-                    >
-                      <MoreHorizIcon fontSize="inherit" />
-                    </Avatar>
-                    <Menu
-                      id="menu-earning-card"
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleClose}
-                      variant="selectedMenu"
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right'
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
-                      }}
-                    >
-                      <MenuItem onClick={handleClose}>
-                        <GetAppTwoToneIcon sx={{ mr: 1.75 }} /> Import Card
-                      </MenuItem>
-                      <MenuItem onClick={handleClose}>
-                        <FileCopyTwoToneIcon sx={{ mr: 1.75 }} /> Copy Data
-                      </MenuItem>
-                      <MenuItem onClick={handleClose}>
-                        <PictureAsPdfTwoToneIcon sx={{ mr: 1.75 }} /> Export
-                      </MenuItem>
-                      <MenuItem onClick={handleClose}>
-                        <ArchiveTwoToneIcon sx={{ mr: 1.75 }} /> Archive File
-                      </MenuItem>
-                    </Menu>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item>
-                <Grid container alignItems="center">
-                  <Grid item>
-                    <Typography sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>$500.00</Typography>
-                  </Grid>
-                  <Grid item>
-                    <Avatar
-                      sx={{
-                        cursor: 'pointer',
-                        ...theme.typography.smallAvatar,
-                        backgroundColor: theme.palette.secondary[200],
-                        color: theme.palette.secondary.dark
-                      }}
-                    >
-                      <ArrowUpwardIcon fontSize="inherit" sx={{ transform: 'rotate3d(1, 1, 1, 45deg)' }} />
-                    </Avatar>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item sx={{ mb: 1.25 }}>
-                <Typography
-                  sx={{
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    color: theme.palette.secondary[200]
-                  }}
-                >
-                  Total Earning
-                </Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        </CardWrapper>
-      )}
-    </>
-  );
+    const handleInputClose = () => {
+        setInputOpen(false);
+        setCurrentOptionIndex(null)
+        setInputValue(null)
+    };
+
+    const handleInputConfirm = () => {
+        if (inputValue) {
+            inputConfig.push({
+                type: "custom",
+                value: inputValue,
+                optionIndex: currentOptionIndex,
+            })
+            setInputConfig(inputConfig)
+            returnInputConfig(inputConfig)
+        }
+
+        handleInputClose()
+    }
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const addCustomInput = (index) => {
+        return () => {
+            if (inputConfig.length > 0) {
+                alert("Only support one input for now.")
+                setAnchorEl(null);
+                return
+            }
+
+            handleInputClickOpen(index)
+            setAnchorEl(null);
+        }
+    }
+
+    const addPrevOutput = (index) => {
+        return () => {
+            if (inputConfig.length > 0) {
+                alert("Only support one input for now.")
+                setAnchorEl(null);
+                return
+            }
+
+            if (!prevOutput || !prevOutput() || prevOutput().length === 0) {
+                alert("No previous output.")
+                setAnchorEl(null);
+                return
+            }
+
+            setAnchorEl(null);
+            inputConfig.push({
+                type: "link",
+                value: prevOutput()[0].value,
+                optionIndex: index,
+            })
+            setInputConfig(inputConfig)
+            returnInputConfig(inputConfig)
+        }
+    }
+
+    const clearAllInput = () => {
+        setAnchorEl(null);
+        setInputConfig([])
+        setOutput([])
+        returnOutput([])
+        returnInputConfig([])
+    }
+
+    const simulate = async () => {
+        if (inputConfig.length === 0) {
+            alert("No input.")
+            setAnchorEl(null);
+            return
+        }
+
+        await componentIns.run(inputConfig)
+        setOutput(componentIns.output)
+        returnOutput(componentIns.output)
+        setAnchorEl(null);
+    }
+
+    const menuItems = () => {
+        let items = []
+        componentIns.inputOptions().map((option, index) => {
+            items.push(<MenuItem onClick={addCustomInput(index)}>
+                <GetAppTwoToneIcon sx={{mr: 1.75}}/> Add Input {option.name}
+            </MenuItem>)
+            items.push(<MenuItem onClick={addPrevOutput(index)}>
+                <GetAppTwoToneIcon sx={{mr: 1.75}}/> Use Prev Output {option.name}
+            </MenuItem>)
+        })
+
+        items.push(
+            <MenuItem onClick={clearAllInput}>
+                <GetAppTwoToneIcon sx={{mr: 1.75}}/> Clear All Input
+            </MenuItem>
+        )
+
+        items.push(
+            <MenuItem onClick={simulate}>
+                <GetAppTwoToneIcon sx={{mr: 1.75}}/> Simulate
+            </MenuItem>
+        )
+
+        return items
+    }
+
+    return (
+        <>
+            {isLoading ? (
+                <SkeletonEarningCard/>
+            ) : (
+                <CardWrapper border={false} content={false}>
+                    <Box sx={{p: 2.25}}>
+                        <Grid container direction="column">
+                            <Grid item>
+                                <Grid container justifyContent="space-between">
+                                    <Grid item>
+                                        <Avatar
+                                            variant="rounded"
+                                            sx={{
+                                                ...theme.typography.commonAvatar,
+                                                ...theme.typography.largeAvatar,
+                                                backgroundColor: theme.palette.secondary[800],
+                                                mt: 1
+                                            }}
+                                            src={component.icon()}
+                                        >
+                                        </Avatar>
+                                    </Grid>
+                                    <Grid item>
+                                        <Avatar
+                                            variant="rounded"
+                                            sx={{
+                                                ...theme.typography.commonAvatar,
+                                                ...theme.typography.mediumAvatar,
+                                                backgroundColor: theme.palette.secondary.dark,
+                                                color: theme.palette.secondary[200],
+                                                zIndex: 1
+                                            }}
+                                            aria-controls="menu-earning-card"
+                                            aria-haspopup="true"
+                                            onClick={handleClick}
+                                        >
+                                            <MoreHorizIcon fontSize="inherit"/>
+                                        </Avatar>
+                                        <Menu
+                                            id="menu-earning-card"
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleClose}
+                                            variant="selectedMenu"
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'right'
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'right'
+                                            }}
+                                        >
+                                            {menuItems()}
+                                            {<Dialog open={inputOpen} onClose={handleInputClose}>
+                                                <DialogContent>
+                                                    <DialogContentText>
+                                                        Enter the value for the input.
+                                                    </DialogContentText>
+                                                    <TextField
+                                                        autoFocus
+                                                        margin="dense"
+                                                        id="name"
+                                                        label="Value"
+                                                        fullWidth
+                                                        variant="standard"
+                                                        onChange={(newValue) => setInputValue(newValue.target.value)}
+                                                    />
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <Button onClick={handleInputConfirm}>Confirm</Button>
+                                                </DialogActions>
+                                            </Dialog>}
+                                        </Menu>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item>
+                                <Grid container alignItems="center">
+                                    <Grid item>
+                                        <Typography sx={{
+                                            fontSize: '2.125rem',
+                                            fontWeight: 500,
+                                            mr: 1,
+                                            mt: 1.75,
+                                            mb: 0.75
+                                        }}>
+                                            Input: {inputConfig.length > 0 ? inputConfig[0].value : 'empty'}
+                                            ({inputConfig.length > 0 ? componentIns.inputOptions()[inputConfig[0].optionIndex].name : 'empty'})
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid container alignItems="center">
+                                    <Grid item>
+                                        <Typography sx={{
+                                            fontSize: '2.125rem',
+                                            fontWeight: 500,
+                                            mr: 1,
+                                            mt: 1.75,
+                                            mb: 0.75
+                                        }}>
+                                            Output: {output.length > 0 ? output[0].value : 'empty'}
+                                            ({output.length > 0 ? output[0].name : 'empty'})
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </CardWrapper>
+            )}
+        </>
+    );
 };
 
 EarningCard.propTypes = {
-  isLoading: PropTypes.bool
+    isLoading: PropTypes.bool
 };
 
 export default EarningCard;

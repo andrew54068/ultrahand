@@ -12,6 +12,11 @@ export class UltrahandComponent {
         // override this method
     }
 
+    static icon() {
+        // override this method
+        return "https://1inch.io/img/favicon/safari-pinned-tab.svg"
+    }
+
     async run() {
         // override this method
     }
@@ -19,12 +24,10 @@ export class UltrahandComponent {
     async Run(inputs) {
         // clear invoke pool by component id
         let invokeNum = InvokePool.getSingleton().invokeNum()
-        console.log("run component: " + this.constructor.name, "invokeNum: " + invokeNum)
         await this.run(inputs);
         if (invokeNum === InvokePool.getSingleton().invokeNum()) {
             InvokePool.getSingleton().packIntoUserOperation()
         }
-        console.log("run component: " + this.constructor.name, "invokeNum: " + invokeNum)
     }
 
     addInvoke(invoke) {
@@ -36,7 +39,7 @@ export class UltrahandComponent {
     }
 
     inputOptions() {
-
+        return []
     }
 
 }
