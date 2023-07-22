@@ -1,7 +1,7 @@
 import {Component} from 'react';
 
 // material-ui
-import {Button, Grid, Input, Typography} from '@mui/material';
+import {Button, Grid, Input, Link, Typography} from '@mui/material';
 
 // project imports
 import EarningCard from './EarningCard';
@@ -30,7 +30,8 @@ class Dashboard extends Component {
             nodesForPreview: [],
             currentNode: null,
             transitionView: null,
-            inTransition: false
+            inTransition: false,
+            userOperationHash: null,
         }
 
         GlobalConfig.getSingleton().update = () => {
@@ -46,16 +47,14 @@ class Dashboard extends Component {
         if (!this.state.currentNode && this.state.currentNode !== 0) {
             return <Button sx={{width: '80%', background: '#ff91008c'}} onClick={() => {
                 if (!this.state.currentNode && this.state.currentNode !== 0) {
-                    this.setState({nodesForPreview: this.nodesForPreview()})
-                    this.setState({currentNode: 0})
-                } else {
-                    this.setState({currentNode: this.state.currentNode + 1})
+                    this.setState({currentNode: 0, userOperationHash: null, nodesForPreview: this.nodesForPreview()})
                 }
             }}>Start</Button>
         } else if (this.state.currentNode >= this.state.nodesForPreview.length) {
             return <Button sx={{width: '80%', background: '#ff91008c'}} onClick={ async () => {
-                await this.UserGo()
-                this.setState({currentNode: null})
+                let hash = await this.UserGo()
+                console.log("After UserGo -> hash: " + hash)
+                this.setState({currentNode: null, userOperationHash: hash})
             }}>GO!</Button>
         }
 
@@ -185,7 +184,8 @@ class Dashboard extends Component {
 
         let unsignedUOP = UserOperationPool.getSingleton().popUserOperation()
         let signedUOP = await UltrahandWallet.currentWallet.simulateTx(unsignedUOP)
-        await UltrahandWallet.currentWallet.sendTx(signedUOP)
+        let {UserOpHash} = await UltrahandWallet.currentWallet.sendTx(signedUOP)
+        return UserOpHash
     }
 
     async SimulateAndSend() {
@@ -287,6 +287,18 @@ class Dashboard extends Component {
                         </Typography>
                     </Grid>
                     {this.previewMode()}
+                    {this.state.userOperationHash ?
+                    <Link href={`https://www.jiffyscan.xyz/userOpHash/${this.state.userOperationHash}?network=matic`}>
+                        <Typography sx={{
+                        fontSize: '0.525rem',
+                        fontWeight: 500,
+                        mr: 1,
+                        mt: 1.75,
+                        mb: 0.75,
+                        width: '80%',
+                    }}>
+                        Check 4337 user operation hash {this.state.userOperationHash} on explorer.
+                    </Typography></Link>: <></>}
                 </Grid>
             </Grid>
         );

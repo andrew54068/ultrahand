@@ -59,56 +59,14 @@ export class BloctoWallet extends UltrahandWallet {
     }
 
     async sendTx(signedUOP) {
-        // blocto mode
-        // let requests = []
-        // for (let i = 0; i < signedUOP.bloctoData.invokes.length; i++) {
-        //     requests.push({
-        //         from: this.bloctoAddress,
-        //         to: signedUOP.bloctoData.invokes[i].to,
-        //         value: signedUOP.bloctoData.invokes[i].value,
-        //         data: signedUOP.bloctoData.invokes[i].data,
-        //     })
-        // }
-        //
-        // let bloctoWeb3 = new Web3(this.bloctoSDK.ethereum)
-        // const txHash = await bloctoWeb3.currentProvider.request({
-        //     method: 'blocto_sendBatchTransaction',
-        //     params: requests
-        // })
-        //
-        // console.log(txHash)
-        // return
-
         const userOpHash = await this.bloctoSDK.ethereum
             .request({
                 method: 'eth_sendUserOperation',
                 params: [{callData: signedUOP.bloctoData}],
             })
 
-        let id = setInterval(async () => {
-            const receipt = await this.bloctoSDK.ethereum
-                .request({
-                    method: 'eth_getUserOperationReceipt',
-                    jsonrpc: "2.0",
-                    id: 1,
-                    params: [userOpHash],
-                })
-            console.log(receipt)
-
-            const userOperation = await this.bloctoSDK.ethereum
-                .request({
-                    method: 'eth_getUserOperationByHash',
-                    jsonrpc: "2.0",
-                    id: 1,
-                    params: [userOpHash],
-                })
-            console.log(userOperation)
-
-            if (id && userOperation.error === undefined) {
-                clearInterval(id)
-            }
-
-        }, 1000)
+        console.log(userOpHash)
+        return {UserOpHash: userOpHash}
     }
 
     isBatchSupported() {
