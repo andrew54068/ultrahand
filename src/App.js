@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
-import {ComponentGraph} from "./core/componentGraph";
-import {BloctoWallet} from "./4337wallets/bloctoWallet";
-import {SafeWallet} from "./4337wallets/safeWallet";
-import {LidoComponent} from "./components/lidoComponent";
-import {InvokePool} from "./core/invokePool";
-import {UserOperationPool} from "./core/userOperationPool";
-import {UltrahandWallet} from "./core/ultrahandWallet";
+import {ComponentGraph} from "./ultrahand/core/componentGraph";
+import {BloctoWallet} from "./ultrahand/4337wallets/bloctoWallet";
+import {SafeWallet} from "./ultrahand/4337wallets/safeWallet";
+import {LidoComponent} from "./ultrahand/components/lidoComponent";
+import {InvokePool} from "./ultrahand/core/invokePool";
+import {UserOperationPool} from "./ultrahand/core/userOperationPool";
+import {UltrahandWallet} from "./ultrahand/core/ultrahandWallet";
 
 function App() {
 
