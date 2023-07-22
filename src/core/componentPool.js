@@ -1,9 +1,11 @@
 import {TestComponent} from "../components/testComponent";
+import {LidoComponent} from "../components/lidoComponent";
 
 export class ComponentPool {
 
     static defaultPool = [
-        TestComponent
+        TestComponent,
+        LidoComponent
     ]
 
     components = {}

@@ -1,4 +1,5 @@
 import {ComponentPool} from "./componentPool";
+import {InvokePool} from "./invokePool";
 
 export class ComponentGraph {
     examples = [
@@ -64,12 +65,15 @@ export class ComponentGraph {
         // same level -> components can not be linked with each other
         // input type == link -> component level must be lower than current level
         // input type == link -> need to check component output spec -> valueType must be the same & output index must exist
-        this.nodes.forEach(node => {
+        this.nodes.forEach((node, index) => {
             let impl = new ComponentPool().getComponent(node.componentID)
             if (impl == null) {
                 alert('component not found: ' + node.componentID)
             } else {
                 new impl().Run()
+                if (this.nodes.length - 1 === index) {
+                    InvokePool.getSingleton().packIntoUserOperation()
+                }
             }
         })
     }

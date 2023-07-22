@@ -1,5 +1,12 @@
 
 export class UltrahandWallet {
+
+    static currentWallet = null;
+
+    static setCurrentWallet(wallet) {
+        UltrahandWallet.currentWallet = wallet;
+    }
+
     constructor() {
 
     }

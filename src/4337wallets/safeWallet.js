@@ -1,19 +1,24 @@
 import {UltrahandWallet} from "../core/ultrahandWallet";
-import {Web3AuthModalPack, SafeAuthKit} from '@safe-global/auth-kit';
-import Safe, { EthersAdapter, SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit'
+import {SafeAuthKit, Web3AuthModalPack} from '@safe-global/auth-kit';
+import Safe, {EthersAdapter, SafeAccountConfig, SafeFactory} from '@safe-global/protocol-kit'
 import {OpenloginAdapter} from '@web3auth/openlogin-adapter';
 import {CHAIN_NAMESPACES, WALLET_ADAPTERS} from "@web3auth/base";
 import {Web3AuthOptions} from '@web3auth/modal';
-import { ethers } from 'ethers'
+import {ethers} from 'ethers'
+import SafeApiKit from '@safe-global/api-kit'
 
 export class SafeWallet extends UltrahandWallet {
+
+    safeAddress = ''
+    ethAdapterOwner1 = null
+    signer = null
 
     constructor() {
         super()
     }
 
     currentAddress() {
-        return ""
+        return this.safeAddress
     }
 
     offChainSignTx() {
@@ -84,74 +89,106 @@ export class SafeWallet extends UltrahandWallet {
             name: 'goerli',
             chainId: 5
         });
-        const signer = provider.getSigner();
+        this.signer = provider.getSigner();
 
-        const signerAddress = await signer.getAddress();
-        console.log(`💥 signerAddress: ${JSON.stringify(signerAddress, null, '  ')}`);
+        const signerAddress = await this.signer.getAddress();
+        console.log(`💥 signerAddress: ${signerAddress}`);
 
-        const signerChainId = await signer.getChainId()
+        const signerChainId = await this.signer.getChainId()
         console.log(`💥 signerChainId: ${signerChainId}`);
 
-        const ethAdapterOwner1 = new EthersAdapter({
+        this.ethAdapterOwner1 = new EthersAdapter({
             ethers,
-            signerOrProvider: signer || provider
-          })
+            signerOrProvider: this.signer || provider
+        })
 
         const safeAccountConfig: SafeAccountConfig = {
             owners: [
                 signerAddress,
             ],
             threshold: 1,
-          }
+        }
 
-        const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapterOwner1 })
+        const safeFactory = await SafeFactory.create({ethAdapter: this.ethAdapterOwner1})
         const predictSafeAddress = await safeFactory.predictSafeAddress(safeAccountConfig)
         console.log(`💥 predictSafeAddress: ${JSON.stringify(predictSafeAddress, null, '  ')}`);
         /**
          * deploy address
          */
-        const safeSdkOwner1 = await safeFactory.deploySafe({ safeAccountConfig })
-        const safeAddress = await safeSdkOwner1.getAddress()
+        // const safeSdkOwner1 = await safeFactory.deploySafe({ safeAccountConfig })
+        // const safeAddress = await safeSdkOwner1.getAddress()
+        // console.log(`💥 safeAddress: ${JSON.stringify(safeAddress, null, '  ')}`);
 
-        /**
-         * already deploy address
-         * const safeAddress = "0x9Be8EE8e11B0Fc9Edf26883809C58C4bb2E6d095"
-         */
+        this.safeAddress = predictSafeAddress
+        UltrahandWallet.setCurrentWallet(this)
+    }
 
+    async simulateTx(unsignedUOP) {
         const safeSDK = await Safe.create({
-            ethAdapter: ethAdapterOwner1,
-            safeAddress
+            ethAdapter: this.ethAdapterOwner1,
+            safeAddress: this.safeAddress
         })
-        
+
+        // trigger signing process
         // Create a Safe transaction with the provided parameters
         const safeTransactionData: MetaTransactionData = {
-            to: '0xF4911Cb13b50D967b9603c747e558dA7c1457e91',
-            data: '0x',
-            value: ethers.utils.parseUnits('0.00001', 'ether').toString()
+            to: unsignedUOP.to,
+            data: unsignedUOP.data,
+            value: parseInt(unsignedUOP.value, 16).toString(10),
+            // value: unsignedUOP.value, // ethers.utils.parseUnits('0.00001', 'ether').toString()
         }
-          
-        const safeTransaction = await safeSDK.createTransaction({ safeTransactionData })
 
+        const safeTransaction = await safeSDK.createTransaction({safeTransactionData})
         console.log(`💥 safeTransaction: ${JSON.stringify(safeTransaction, null, '  ')}`);
 
-        // setSafeAuthSignInResponse(signInInfo)
-        // setUserInfo(userInfo || undefined)
-        // setProvider(web3AuthModalPack.getProvider())
+        const txServiceUrl = 'https://safe-transaction-goerli.safe.global'
+        const safeService = new SafeApiKit({txServiceUrl, ethAdapter: this.ethAdapterOwner1})
+
+        // Deterministic hash based on transaction parameters
+        const safeTxHash = await safeSDK.getTransactionHash(safeTransaction)
+
+// Sign transaction to verify that the transaction is coming from owner 1
+        const senderSignature = await safeSDK.signTransactionHash(safeTxHash)
+
+        await safeService.proposeTransaction({
+            safeAddress: this.safeAddress,
+            safeTransactionData: safeTransaction.data,
+            safeTxHash,
+            senderAddress: await this.signer.getAddress(),
+            senderSignature: senderSignature.data,
+        })
+
+        return {signedSafeTx: safeTransaction}
     }
 
-    simulateTx(unsignedUOP) {
-        // trigger signing process
-    }
+    async sendTx(signedUOP) {
+        const safeSDK = await Safe.create({
+            ethAdapter: this.ethAdapterOwner1,
+            safeAddress: this.safeAddress
+        })
 
-    sendTx(signedUOP) {
+        // const pendingTransactions = await safeService.getPendingTransactions(safeAddress).results
+        const executeTxResponse = await safeSDK.executeTransaction(signedUOP.signedSafeTx)
+        const receipt = await executeTxResponse.transactionResponse?.wait()
+
+        // console.log('pendingTransactions', pendingTransactions)
+        console.log('Transaction executed:')
+        console.log(`https://goerli.etherscan.io/tx/${receipt.transactionHash}`)
     }
 
     isBatchSupported() {
+        return false
     }
 
     packTx(invoke) {
+        return {
+            to: invoke.to,
+            value: invoke.value,
+            data: invoke.data
+        }
     }
 
     packBatchTx(invokes) {
+        alert('batch tx not supported')
     }
 }
