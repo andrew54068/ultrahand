@@ -1,4 +1,4 @@
-import {LidoComponent} from "../components/lidoComponent";
+import {ApeCoinComponent} from "../components/apeCoinComponent";
 import {TransferComponent} from "../components/transferComponent";
 import {OneInchComponent} from "../components/1inchComponent";
 import {AaveComponent} from "../components/aaveComponent";
@@ -9,7 +9,7 @@ export class ComponentPool {
         TransferComponent,
         OneInchComponent,
         AaveComponent,
-        LidoComponent,
+        ApeCoinComponent,
     ]
 
     components = {}

@@ -2,7 +2,7 @@ import {ComponentGraph} from "../core/componentGraph";
 import {UltrahandWallet} from "../core/ultrahandWallet";
 import {BloctoWallet} from "../4337wallets/bloctoWallet";
 import {SafeWallet} from "../4337wallets/safeWallet";
-import {LidoComponent} from "../components/lidoComponent";
+import {ApeCoinComponent} from "../components/apeCoinComponent";
 import {InvokePool} from "../core/invokePool";
 import {UserOperationPool} from "../core/userOperationPool";
 
@@ -21,7 +21,7 @@ let connectBloctoTest = async () => {
 }
 
 let lidoTest = async () => {
-    new LidoComponent().run()
+    new ApeCoinComponent().run()
 }
 
 let safeTest = async () => {
@@ -34,7 +34,7 @@ let safeTest = async () => {
             {
                 level: 0,
                 index: 0,
-                componentID: 'lidoComponent',
+                componentID: 'apeCoinComponent',
                 inputs: [
                     {
                         type: "custom",
