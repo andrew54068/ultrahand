@@ -270,6 +270,40 @@ class Dashboard extends Component {
             </Grid>)
         });
 
+        const createLink = () => {
+            if (this.state.userOperationHash) {
+                if (UltrahandWallet.currentWallet.safeAddress && UltrahandWallet.currentWallet.safeAddress !== '') {
+                    return <Link href={`https://polygonscan.com/tx/${this.state.userOperationHash}`}>
+                        <Typography sx={{
+                            fontSize: '0.525rem',
+                            fontWeight: 500,
+                            mr: 1,
+                            mt: 1.75,
+                            mb: 0.75,
+                            width: '80%',
+                        }}>
+                            Check tansaction hash {this.state.userOperationHash} on explorer.
+                        </Typography>
+                    </Link>
+                } else {
+                    return <Link href={`https://www.jiffyscan.xyz/userOpHash/${this.state.userOperationHash}?network=matic`}>
+                        <Typography sx={{
+                            fontSize: '0.525rem',
+                            fontWeight: 500,
+                            mr: 1,
+                            mt: 1.75,
+                            mb: 0.75,
+                            width: '80%',
+                        }}>
+                            Check 4337 user operation hash {this.state.userOperationHash} on explorer.
+                        </Typography>
+                    </Link>
+                }
+            } else {
+                return <></>
+            }
+        }
+
         return (
             <Grid container spacing={gridSpacing}>
                 <Grid item xs={6}>
@@ -289,18 +323,7 @@ class Dashboard extends Component {
                         </Typography>
                     </Grid>
                     {this.previewMode()}
-                    {this.state.userOperationHash ?
-                    <Link href={`https://www.jiffyscan.xyz/userOpHash/${this.state.userOperationHash}?network=matic`}>
-                        <Typography sx={{
-                        fontSize: '0.525rem',
-                        fontWeight: 500,
-                        mr: 1,
-                        mt: 1.75,
-                        mb: 0.75,
-                        width: '80%',
-                    }}>
-                        Check 4337 user operation hash {this.state.userOperationHash} on explorer.
-                    </Typography></Link>: <></>}
+                    {createLink()}
                 </Grid>
             </Grid>
         );

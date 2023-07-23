@@ -100,9 +100,12 @@ export class SafeWallet extends UltrahandWallet {
 
         const executeTxResponse = await safeSDK.executeTransaction(signedUOP.signedSafeTx)
         const receipt = await executeTxResponse.transactionResponse?.wait()
-
+        
         console.log('Transaction executed:')
         console.log(`https://www.jiffyscan.xyz/bundle/${receipt.transactionHash}?network=matic&pageNo=0&pageSize=10`)
+        return { 
+            UserOpHash: receipt.transactionHash
+        }
     }
 
     isBatchSupported() {
